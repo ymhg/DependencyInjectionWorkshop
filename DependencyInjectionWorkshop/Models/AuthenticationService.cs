@@ -8,11 +8,11 @@ namespace DependencyInjectionWorkshop.Models
     public class AuthenticationService
     {
         private readonly IFailedCounter _failedCounter;
+        private readonly IHash _hash;
         private readonly ILogger _logger;
+        private readonly INotification _notification;
         private readonly IOtpService _otpService;
         private readonly IProfile _profile;
-        private readonly IHash _hash;
-        private readonly INotification _notification;
 
         public AuthenticationService(IFailedCounter failedCounter, ILogger logger, IOtpService otpService,
             IProfile profile, IHash hash, INotification notification)
