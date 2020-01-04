@@ -8,6 +8,7 @@ namespace DependencyInjectionWorkshopTests
     public class AuthenticationServiceTests
     {
         private const string DefaultAccountId = "joey";
+        private const int DefaultFailedCount = 91;
         private AuthenticationService _authenticationService;
         private IFailedCounter _failedCounter;
         private IHash _hash;
@@ -63,6 +64,19 @@ namespace DependencyInjectionWorkshopTests
             ShouldAddFailedCount(DefaultAccountId);
         }
 
+        [Test]
+        public void log_failed_count_when_invalid()
+        {
+            GivenFailedCount(DefaultFailedCount);
+            WhenInvalid();
+            LogShouldContains(DefaultAccountId, DefaultFailedCount.ToString());
+        }
+
+        private void GivenFailedCount(int failedCount)
+        {
+            _failedCounter.GetFailedCount(DefaultAccountId).Returns(failedCount);
+        }
+
         private void GivenHashedPassword(string password, string hashedPassword)
         {
             _hash.Compute(password).Returns(hashedPassword);
@@ -76,6 +90,12 @@ namespace DependencyInjectionWorkshopTests
         private void GivenPasswordFromDb(string accountId, string passwordFromDb)
         {
             _profile.GetPassword(accountId).Returns(passwordFromDb);
+        }
+
+        private void LogShouldContains(string accountId, string failedCount)
+        {
+            _logger.Received(1).Info(
+                Arg.Is<string>(message => message.Contains(accountId) && message.Contains(failedCount)));
         }
 
         private void ShouldAddFailedCount(string accountId)
