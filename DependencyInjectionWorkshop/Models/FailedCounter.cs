@@ -4,7 +4,22 @@ using System.Net.Http;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class FailedCounter
+    public interface IFailedCounter
+    {
+        void Reset(string accountId);
+        void AddFailedCount(string accountId);
+
+        /// <summary>
+        /// Gets the account is locked.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <returns></returns>
+        bool GetAccountIsLocked(string accountId);
+
+        int GetFailedCount(string accountId);
+    }
+
+    public class FailedCounter : IFailedCounter
     {
         public FailedCounter()
         {

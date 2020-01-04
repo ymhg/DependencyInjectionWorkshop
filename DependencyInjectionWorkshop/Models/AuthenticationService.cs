@@ -7,32 +7,32 @@ namespace DependencyInjectionWorkshop.Models
 {
     public class AuthenticationService
     {
-        private readonly FailedCounter _failedCounter;
-        private readonly NLogAdapter _nLogAdapter;
-        private readonly OtpService _otpService;
-        private readonly IProfile _profileDao;
+        private readonly IFailedCounter _failedCounter;
+        private readonly ILogger _logger;
+        private readonly IOtpService _otpService;
+        private readonly IProfile _profile;
         private readonly IHash _hash;
-        private readonly SlackAdapter _slackAdapter;
+        private readonly INotification _notification;
 
-        public AuthenticationService(FailedCounter failedCounter, NLogAdapter nLogAdapter, OtpService otpService,
-            IProfile profileDao, IHash hash, SlackAdapter slackAdapter)
+        public AuthenticationService(IFailedCounter failedCounter, ILogger logger, IOtpService otpService,
+            IProfile profile, IHash hash, INotification notification)
         {
             _failedCounter = failedCounter;
-            _nLogAdapter = nLogAdapter;
+            _logger = logger;
             _otpService = otpService;
-            _profileDao = profileDao;
+            _profile = profile;
             _hash = hash;
-            _slackAdapter = slackAdapter;
+            _notification = notification;
         }
 
         public AuthenticationService()
         {
-            _profileDao = new ProfileDao();
+            _profile = new ProfileDao();
             _hash = new Sha256Adapter();
             _otpService = new OtpService();
-            _slackAdapter = new SlackAdapter();
+            _notification = new SlackAdapter();
             _failedCounter = new FailedCounter();
-            _nLogAdapter = new NLogAdapter();
+            _logger = new NLogAdapter();
         }
 
         public bool Verify(string accountId, string password, string otp)
@@ -44,7 +44,7 @@ namespace DependencyInjectionWorkshop.Models
                 throw new FailedTooManyTimesException() {AccountId = accountId};
             }
 
-            var passwordFromDb = _profileDao.GetPassword(accountId);
+            var passwordFromDb = _profile.GetPassword(accountId);
 
             var hashedPassword = _hash.Compute(password);
 
@@ -64,7 +64,7 @@ namespace DependencyInjectionWorkshop.Models
 
                 LogFailedCount(accountId);
 
-                _slackAdapter.Notify(accountId);
+                _notification.Notify(accountId);
 
                 return false;
             }
@@ -74,7 +74,7 @@ namespace DependencyInjectionWorkshop.Models
         {
             //紀錄失敗次數 
             var failedCount = _failedCounter.GetFailedCount(accountId);
-            _nLogAdapter.Info($"accountId:{accountId} failed times:{failedCount}");
+            _logger.Info($"accountId:{accountId} failed times:{failedCount}");
         }
     }
 

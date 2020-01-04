@@ -3,7 +3,18 @@ using System.Net.Http;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class OtpService
+    public interface IOtpService
+    {
+        /// <summary>
+        /// Gets the current otp.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">web api error, accountId:{accountId}</exception>
+        string GetCurrentOtp(string accountId);
+    }
+
+    public class OtpService : IOtpService
     {
         public OtpService()
         {

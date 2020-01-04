@@ -2,7 +2,16 @@
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class SlackAdapter
+    public interface INotification
+    {
+        /// <summary>
+        /// Notifies the specified account identifier.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        void Notify(string accountId);
+    }
+
+    public class SlackAdapter : INotification
     {
         public SlackAdapter()
         {
