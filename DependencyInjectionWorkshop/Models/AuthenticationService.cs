@@ -70,7 +70,7 @@ namespace DependencyInjectionWorkshop.Models
         {
             //紀錄失敗次數 
             var failedCount = _failedCounter.GetFailedCount(accountId, httpClient);
-            _nLogAdapter.Info(accountId, failedCount);
+            _nLogAdapter.Info($"accountId:{accountId} failed times:{failedCount}");
         }
     }
 
