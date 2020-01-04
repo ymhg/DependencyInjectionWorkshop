@@ -32,7 +32,7 @@ namespace DependencyInjectionWorkshopTests
         [Test]
         public void reset_failed_count_when_valid()
         {
-            WhenValid(); 
+            WhenValid();
             ShouldResetFailedCount(DefaultAccountId);
         }
 
@@ -56,6 +56,13 @@ namespace DependencyInjectionWorkshopTests
             ShouldBeValid(DefaultAccountId, "1234", "123456");
         }
 
+        [Test]
+        public void add_failed_count_when_invalid()
+        {
+            WhenInvalid();
+            ShouldAddFailedCount(DefaultAccountId);
+        }
+
         private void GivenHashedPassword(string password, string hashedPassword)
         {
             _hash.Compute(password).Returns(hashedPassword);
@@ -69,6 +76,12 @@ namespace DependencyInjectionWorkshopTests
         private void GivenPasswordFromDb(string accountId, string passwordFromDb)
         {
             _profile.GetPassword(accountId).Returns(passwordFromDb);
+        }
+
+        private void ShouldAddFailedCount(string accountId)
+        {
+            _failedCounter.Received(1)
+                          .AddFailedCount(accountId);
         }
 
         private void ShouldBeInvalid(string accountId, string password, string otp)
@@ -89,6 +102,15 @@ namespace DependencyInjectionWorkshopTests
         {
             _failedCounter.Received(1)
                           .Reset(accountId);
+        }
+
+        private void WhenInvalid()
+        {
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp(DefaultAccountId, "123456");
+
+            _authenticationService.Verify(DefaultAccountId, "1234", "wrong otp");
         }
 
         private void WhenValid()
