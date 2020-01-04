@@ -1,46 +1,48 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using Dapper;
 using SlackAPI;
+#pragma warning disable 1591
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class ProfileDao
+    public class Sha256Adapter
     {
-        public ProfileDao()
+        public Sha256Adapter()
         {
         }
 
         /// <summary>
-        /// Gets the password from database.
+        /// Gets the hashed password.
         /// </summary>
-        /// <param name="accountId">The account identifier.</param>
+        /// <param name="password">The password.</param>
         /// <returns></returns>
-        public string GetPasswordFromDb(string accountId)
+        public string GetHashedPassword(string password)
         {
-            string passwordFromDb;
-            using (var connection = new SqlConnection("my connection string"))
+            //hash
+            var crypt = new SHA256Managed();
+            var hash = new StringBuilder();
+            var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(password));
+            foreach (var theByte in crypto)
             {
-                passwordFromDb = connection.Query<string>("spGetUserPassword", new {Id = accountId},
-                                                          commandType: CommandType.StoredProcedure).SingleOrDefault();
+                hash.Append(theByte.ToString("x2"));
             }
 
-            return passwordFromDb;
+            var hashedPassword = hash.ToString();
+            return hashedPassword;
         }
     }
 
     public class AuthenticationService
     {
         private readonly ProfileDao _profileDao;
+        private readonly Sha256Adapter _sha256Adapter;
 
         public AuthenticationService()
         {
             _profileDao = new ProfileDao();
+            _sha256Adapter = new Sha256Adapter();
         }
 
         public bool Verify(string accountId, string password, string otp)
@@ -56,7 +58,7 @@ namespace DependencyInjectionWorkshop.Models
 
             var passwordFromDb = _profileDao.GetPasswordFromDb(accountId);
 
-            var hashedPassword = GetHashedPassword(password);
+            var hashedPassword = _sha256Adapter.GetHashedPassword(password);
 
             var currentOtp = GetCurrentOtp(accountId, httpClient);
 
@@ -165,26 +167,6 @@ namespace DependencyInjectionWorkshop.Models
 
             var currentOtp = response.Content.ReadAsAsync<string>().Result;
             return currentOtp;
-        }
-
-        /// <summary>
-        /// Gets the hashed password.
-        /// </summary>
-        /// <param name="password">The password.</param>
-        /// <returns></returns>
-        private static string GetHashedPassword(string password)
-        {
-            //hash
-            var crypt = new SHA256Managed();
-            var hash = new StringBuilder();
-            var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(password));
-            foreach (var theByte in crypto)
-            {
-                hash.Append(theByte.ToString("x2"));
-            }
-
-            var hashedPassword = hash.ToString();
-            return hashedPassword;
         }
     }
 
