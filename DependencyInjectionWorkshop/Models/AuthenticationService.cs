@@ -5,63 +5,29 @@ using System.Net.Http;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class NotificationDecorator : IAuthentication
-    {
-        private readonly IAuthentication _authenticationService;
-        private readonly INotification _notification;
-
-        public NotificationDecorator(IAuthentication authenticationService, INotification notification)
-        {
-            _authenticationService = authenticationService;
-            _notification = notification;
-        }
-
-        public bool Verify(string accountId, string password, string otp)
-        {
-            var isValid = _authenticationService.Verify(accountId, password, otp);
-            if (!isValid)
-            {
-                Notify(accountId);
-            }
-
-            return isValid;
-        }
-
-        private void Notify(string accountId)
-        {
-            _notification.Notify(accountId, $"account:{accountId} try to login failed");
-        }
-    }
-
     public class AuthenticationService : IAuthentication
     {
         private readonly IFailedCounter _failedCounter;
         private readonly IHash _hash;
         private readonly ILogger _logger;
-        private readonly INotification _notification;
-        private readonly NotificationDecorator _notificationDecorator;
         private readonly IOtpService _otpService;
         private readonly IProfile _profile;
 
         public AuthenticationService(IFailedCounter failedCounter, ILogger logger, IOtpService otpService,
-            IProfile profile, IHash hash, INotification notification)
+            IProfile profile, IHash hash)
         {
-            //_notificationDecorator = new NotificationDecorator(this);
             _failedCounter = failedCounter;
             _logger = logger;
             _otpService = otpService;
             _profile = profile;
             _hash = hash;
-            _notification = notification;
         }
 
         public AuthenticationService()
         {
-            //_notificationDecorator = new NotificationDecorator(this);
             _profile = new ProfileDao();
             _hash = new Sha256Adapter();
             _otpService = new OtpService();
-            _notification = new SlackAdapter();
             _failedCounter = new FailedCounter();
             _logger = new NLogAdapter();
         }
@@ -94,8 +60,6 @@ namespace DependencyInjectionWorkshop.Models
                 _failedCounter.AddFailedCount(accountId);
 
                 LogFailedCount(accountId);
-
-                //_notificationDecorator.Notify(accountId);
 
                 return false;
             }

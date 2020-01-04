@@ -10,7 +10,7 @@ namespace DependencyInjectionWorkshopTests
     {
         private const string DefaultAccountId = "joey";
         private const int DefaultFailedCount = 91;
-        private IAuthentication _authenticationService;
+        private IAuthentication _authentication;
         private IFailedCounter _failedCounter;
         private IHash _hash;
         private ILogger _logger;
@@ -27,10 +27,10 @@ namespace DependencyInjectionWorkshopTests
             _logger = Substitute.For<ILogger>();
             _notification = Substitute.For<INotification>();
             _failedCounter = Substitute.For<IFailedCounter>();
-            _authenticationService =
-                new AuthenticationService(_failedCounter, _logger, _otpService, _profile, _hash, _notification);
+            _authentication =
+                new AuthenticationService(_failedCounter, _logger, _otpService, _profile, _hash);
 
-            _authenticationService = new NotificationDecorator(_authenticationService, _notification);
+            _authentication = new NotificationDecorator(_authentication, _notification);
         }
 
         [Test]
@@ -128,14 +128,14 @@ namespace DependencyInjectionWorkshopTests
 
         private void ShouldBeInvalid(string accountId, string password, string otp)
         {
-            var isValid = _authenticationService.Verify(accountId, password, otp);
+            var isValid = _authentication.Verify(accountId, password, otp);
 
             Assert.IsFalse(isValid);
         }
 
         private void ShouldBeValid(string accountId, string password, string otp)
         {
-            var isValid = _authenticationService.Verify(accountId, password, otp);
+            var isValid = _authentication.Verify(accountId, password, otp);
 
             Assert.IsTrue(isValid);
         }
@@ -153,7 +153,7 @@ namespace DependencyInjectionWorkshopTests
 
         private void ShouldThrow<TException>() where TException : Exception
         {
-            TestDelegate action = () => _authenticationService.Verify(DefaultAccountId, "1234", "123456");
+            TestDelegate action = () => _authentication.Verify(DefaultAccountId, "1234", "123456");
             Assert.Throws<TException>(action);
         }
 
@@ -163,7 +163,7 @@ namespace DependencyInjectionWorkshopTests
             GivenHashedPassword("1234", "my hashed password");
             GivenOtp(DefaultAccountId, "123456");
 
-            _authenticationService.Verify(DefaultAccountId, "1234", "wrong otp");
+            _authentication.Verify(DefaultAccountId, "1234", "wrong otp");
         }
 
         private void WhenValid()
@@ -172,7 +172,7 @@ namespace DependencyInjectionWorkshopTests
             GivenHashedPassword("1234", "my hashed password");
             GivenOtp(DefaultAccountId, "123456");
 
-            _authenticationService.Verify(DefaultAccountId, "1234", "123456");
+            _authentication.Verify(DefaultAccountId, "1234", "123456");
         }
     }
 }
