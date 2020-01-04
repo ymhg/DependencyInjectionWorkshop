@@ -49,6 +49,12 @@ namespace DependencyInjectionWorkshop.Models
             }
         }
 
+        /// <summary>
+        /// Gets the account is locked.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <returns></returns>
         private static bool GetAccountIsLocked(string accountId, HttpClient httpClient)
         {
             var isLockedResponse = httpClient.PostAsJsonAsync("api/failedCounter/IsLocked", accountId).Result;
@@ -58,6 +64,10 @@ namespace DependencyInjectionWorkshop.Models
             return isLocked;
         }
 
+        /// <summary>
+        /// Notifies the specified account identifier.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
         private static void Notify(string accountId)
         {
             //notify
@@ -66,6 +76,11 @@ namespace DependencyInjectionWorkshop.Models
             slackClient.PostMessage(messageResponse => { }, "my channel", message, "my bot name");
         }
 
+        /// <summary>
+        /// Logs the failed count.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <param name="httpClient">The HTTP client.</param>
         private static void LogFailedCount(string accountId, HttpClient httpClient)
         {
             //紀錄失敗次數 
@@ -79,18 +94,35 @@ namespace DependencyInjectionWorkshop.Models
             logger.Info($"accountId:{accountId} failed times:{failedCount}");
         }
 
+        /// <summary>
+        /// Adds the failed count.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <param name="httpClient">The HTTP client.</param>
         private static void AddFailedCount(string accountId, HttpClient httpClient)
         {
             var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
             addFailedCountResponse.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Resets the failed count.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <param name="httpClient">The HTTP client.</param>
         private static void ResetFailedCount(string accountId, HttpClient httpClient)
         {
             var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
             resetResponse.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Gets the current otp.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">web api error, accountId:{accountId}</exception>
         private static string GetCurrentOtp(string accountId, HttpClient httpClient)
         {
             //get otp
@@ -104,6 +136,11 @@ namespace DependencyInjectionWorkshop.Models
             return currentOtp;
         }
 
+        /// <summary>
+        /// Gets the hashed password.
+        /// </summary>
+        /// <param name="password">The password.</param>
+        /// <returns></returns>
         private static string GetHashedPassword(string password)
         {
             //hash
@@ -119,9 +156,13 @@ namespace DependencyInjectionWorkshop.Models
             return hashedPassword;
         }
 
+        /// <summary>
+        /// Gets the password from database.
+        /// </summary>
+        /// <param name="accountId">The account identifier.</param>
+        /// <returns></returns>
         private static string GetPasswordFromDb(string accountId)
         {
-            //get password
             string passwordFromDb;
             using (var connection = new SqlConnection("my connection string"))
             {
