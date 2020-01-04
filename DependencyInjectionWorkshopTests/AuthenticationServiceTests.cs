@@ -83,9 +83,13 @@ namespace DependencyInjectionWorkshopTests
         [Test]
         public void account_is_locked()
         {
-            _failedCounter.GetAccountIsLocked(DefaultAccountId).Returns(true);
-            TestDelegate action = () => _authenticationService.Verify(DefaultAccountId, "1234", "123456");
-            Assert.Throws<FailedTooManyTimesException>(action);
+            GivenAccountIsLocked(true);
+            ShouldThrow<FailedTooManyTimesException>();
+        }
+
+        private void GivenAccountIsLocked(bool isLocked)
+        {
+            _failedCounter.GetAccountIsLocked(DefaultAccountId).Returns(isLocked);
         }
 
         private void GivenFailedCount(int failedCount)
@@ -143,6 +147,12 @@ namespace DependencyInjectionWorkshopTests
         {
             _failedCounter.Received(1)
                           .Reset(accountId);
+        }
+
+        private void ShouldThrow<TException>() where TException : Exception
+        {
+            TestDelegate action = () => _authenticationService.Verify(DefaultAccountId, "1234", "123456");
+            Assert.Throws<TException>(action);
         }
 
         private void WhenInvalid()
