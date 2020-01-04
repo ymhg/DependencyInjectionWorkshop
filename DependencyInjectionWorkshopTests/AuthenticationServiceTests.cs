@@ -7,24 +7,55 @@ namespace DependencyInjectionWorkshopTests
     [TestFixture]
     public class AuthenticationServiceTests
     {
+        private AuthenticationService _authenticationService;
+        private IFailedCounter _failedCounter;
+        private IHash _hash;
+        private ILogger _logger;
+        private INotification _notification;
+        private IOtpService _otpService;
+        private IProfile _profile;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _otpService = Substitute.For<IOtpService>();
+            _hash = Substitute.For<IHash>();
+            _profile = Substitute.For<IProfile>();
+            _logger = Substitute.For<ILogger>();
+            _notification = Substitute.For<INotification>();
+            _failedCounter = Substitute.For<IFailedCounter>();
+            _authenticationService =
+                new AuthenticationService(_failedCounter, _logger, _otpService, _profile, _hash, _notification);
+        }
+
         [Test]
         public void is_valid()
         {
-            var profile = Substitute.For<IProfile>();
-            var hash = Substitute.For<IHash>();
-            var otpService = Substitute.For<IOtpService>();
-            var logger = Substitute.For<ILogger>();
-            var notification = Substitute.For<INotification>();
-            var failedCounter = Substitute.For<IFailedCounter>();
+            GivenPasswordFromDb("joey", "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp("joey", "123456");
 
-            var authenticationService = new AuthenticationService(
-                failedCounter, logger, otpService, profile, hash, notification);
+            ShouldBeValid("joey", "1234", "123456");
+        }
 
-            profile.GetPassword("joey").Returns("my hashed password");
-            hash.Compute("1234").Returns("my hashed password");
-            otpService.GetCurrentOtp("joey").Returns("123456");
+        private void GivenHashedPassword(string password, string hashedPassword)
+        {
+            _hash.Compute(password).Returns(hashedPassword);
+        }
 
-            var isValid = authenticationService.Verify("joey", "1234", "123456");
+        private void GivenOtp(string accountId, string otp)
+        {
+            _otpService.GetCurrentOtp(accountId).Returns(otp);
+        }
+
+        private void GivenPasswordFromDb(string accountId, string passwordFromDb)
+        {
+            _profile.GetPassword(accountId).Returns(passwordFromDb);
+        }
+
+        private void ShouldBeValid(string accountId, string password, string otp)
+        {
+            var isValid = _authenticationService.Verify(accountId, password, otp);
 
             Assert.IsTrue(isValid);
         }
