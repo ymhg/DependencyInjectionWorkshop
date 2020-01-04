@@ -7,6 +7,7 @@ namespace DependencyInjectionWorkshopTests
     [TestFixture]
     public class AuthenticationServiceTests
     {
+        private const string DefaultAccountId = "joey";
         private AuthenticationService _authenticationService;
         private IFailedCounter _failedCounter;
         private IHash _hash;
@@ -31,11 +32,11 @@ namespace DependencyInjectionWorkshopTests
         [Test]
         public void is_valid()
         {
-            GivenPasswordFromDb("joey", "my hashed password");
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
             GivenHashedPassword("1234", "my hashed password");
-            GivenOtp("joey", "123456");
+            GivenOtp(DefaultAccountId, "123456");
 
-            ShouldBeValid("joey", "1234", "123456");
+            ShouldBeValid(DefaultAccountId, "1234", "123456");
         }
 
         private void GivenHashedPassword(string password, string hashedPassword)
