@@ -39,6 +39,16 @@ namespace DependencyInjectionWorkshopTests
             ShouldBeValid(DefaultAccountId, "1234", "123456");
         }
 
+        [Test]
+        public void is_invalid()
+        {
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp(DefaultAccountId, "123456");
+
+            ShouldBeInvalid(DefaultAccountId, "1234", "wrong otp");
+        }
+
         private void GivenHashedPassword(string password, string hashedPassword)
         {
             _hash.Compute(password).Returns(hashedPassword);
@@ -52,6 +62,13 @@ namespace DependencyInjectionWorkshopTests
         private void GivenPasswordFromDb(string accountId, string passwordFromDb)
         {
             _profile.GetPassword(accountId).Returns(passwordFromDb);
+        }
+
+        private void ShouldBeInvalid(string accountId, string password, string otp)
+        {
+            var isValid = _authenticationService.Verify(accountId, password, otp);
+
+            Assert.IsFalse(isValid);
         }
 
         private void ShouldBeValid(string accountId, string password, string otp)
