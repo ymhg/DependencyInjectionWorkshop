@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class AuthenticationService
+    public class AuthenticationService : IAuthentication
     {
         private readonly IFailedCounter _failedCounter;
         private readonly IHash _hash;

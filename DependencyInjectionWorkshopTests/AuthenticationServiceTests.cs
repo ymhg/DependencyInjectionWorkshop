@@ -10,7 +10,7 @@ namespace DependencyInjectionWorkshopTests
     {
         private const string DefaultAccountId = "joey";
         private const int DefaultFailedCount = 91;
-        private AuthenticationService _authenticationService;
+        private IAuthentication _authenticationService;
         private IFailedCounter _failedCounter;
         private IHash _hash;
         private ILogger _logger;
@@ -32,6 +32,16 @@ namespace DependencyInjectionWorkshopTests
         }
 
         [Test]
+        public void is_valid()
+        {
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp(DefaultAccountId, "123456");
+
+            ShouldBeValid(DefaultAccountId, "1234", "123456");
+        }
+
+        [Test]
         public void reset_failed_count_when_valid()
         {
             WhenValid();
@@ -46,16 +56,6 @@ namespace DependencyInjectionWorkshopTests
             GivenOtp(DefaultAccountId, "123456");
 
             ShouldBeInvalid(DefaultAccountId, "1234", "wrong otp");
-        }
-
-        [Test]
-        public void is_valid()
-        {
-            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
-            GivenHashedPassword("1234", "my hashed password");
-            GivenOtp(DefaultAccountId, "123456");
-
-            ShouldBeValid(DefaultAccountId, "1234", "123456");
         }
 
         [Test]
