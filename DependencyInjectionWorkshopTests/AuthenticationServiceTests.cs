@@ -29,6 +29,8 @@ namespace DependencyInjectionWorkshopTests
             _failedCounter = Substitute.For<IFailedCounter>();
             _authenticationService =
                 new AuthenticationService(_failedCounter, _logger, _otpService, _profile, _hash, _notification);
+
+            _authenticationService = new NotificationDecorator(_authenticationService, _notification);
         }
 
         [Test]
