@@ -14,6 +14,16 @@ namespace DependencyInjectionWorkshop.Models
         private readonly Sha256Adapter _sha256Adapter;
         private readonly SlackAdapter _slackAdapter;
 
+        public AuthenticationService(FailedCounter failedCounter, NLogAdapter nLogAdapter, OtpService otpService, ProfileDao profileDao, Sha256Adapter sha256Adapter, SlackAdapter slackAdapter)
+        {
+            _failedCounter = failedCounter;
+            _nLogAdapter = nLogAdapter;
+            _otpService = otpService;
+            _profileDao = profileDao;
+            _sha256Adapter = sha256Adapter;
+            _slackAdapter = slackAdapter;
+        }
+
         public AuthenticationService()
         {
             _profileDao = new ProfileDao();
