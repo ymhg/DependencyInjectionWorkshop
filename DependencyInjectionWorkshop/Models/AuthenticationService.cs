@@ -7,11 +7,12 @@ namespace DependencyInjectionWorkshop.Models
 {
     public class AuthenticationService
     {
+        private readonly FailedCounter _failedCounter;
+        private readonly NLogAdapter _nLogAdapter;
+        private readonly OtpService _otpService;
         private readonly ProfileDao _profileDao;
         private readonly Sha256Adapter _sha256Adapter;
-        private readonly OtpService _otpService;
         private readonly SlackAdapter _slackAdapter;
-        private readonly FailedCounter _failedCounter;
 
         public AuthenticationService()
         {
@@ -20,7 +21,7 @@ namespace DependencyInjectionWorkshop.Models
             _otpService = new OtpService();
             _slackAdapter = new SlackAdapter();
             _failedCounter = new FailedCounter();
-
+            _nLogAdapter = new NLogAdapter();
         }
 
         public bool Verify(string accountId, string password, string otp)
@@ -61,32 +62,15 @@ namespace DependencyInjectionWorkshop.Models
         }
 
         /// <summary>
-        /// Logs the failed count.
+        ///     Logs the failed count.
         /// </summary>
         /// <param name="accountId">The account identifier.</param>
         /// <param name="httpClient">The HTTP client.</param>
         private void LogFailedCount(string accountId, HttpClient httpClient)
         {
             //紀錄失敗次數 
-            var failedCount = GetFailedCount(accountId, httpClient);
-            Log(accountId, failedCount);
-        }
-
-        private static void Log(string accountId, int failedCount)
-        {
-            var logger = NLog.LogManager.GetCurrentClassLogger();
-            logger.Info($"accountId:{accountId} failed times:{failedCount}");
-        }
-
-        private int GetFailedCount(string accountId, HttpClient httpClient)
-        {
-            var failedCountResponse =
-                httpClient.PostAsJsonAsync("api/failedCounter/GetFailedCount", accountId).Result;
-
-            failedCountResponse.EnsureSuccessStatusCode();
-
-            var failedCount = failedCountResponse.Content.ReadAsAsync<int>().Result;
-            return failedCount;
+            var failedCount = _failedCounter.GetFailedCount(accountId, httpClient);
+            _nLogAdapter.Info(accountId, failedCount);
         }
     }
 
