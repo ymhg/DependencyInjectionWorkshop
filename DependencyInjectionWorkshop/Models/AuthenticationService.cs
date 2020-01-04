@@ -50,14 +50,11 @@ namespace DependencyInjectionWorkshop.Models
             //compare
             if (passwordFromDb == hashedPassword && currentOtp == otp)
             {
-                _failedCounter.Reset(accountId);
-
                 return true;
             }
             else
             {
                 //失敗
-                _failedCounter.AddFailedCount(accountId);
 
                 LogFailedCount(accountId);
 
