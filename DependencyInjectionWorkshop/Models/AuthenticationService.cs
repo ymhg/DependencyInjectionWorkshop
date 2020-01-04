@@ -1,48 +1,22 @@
 ﻿using System;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using SlackAPI;
+
 #pragma warning disable 1591
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class Sha256Adapter
-    {
-        public Sha256Adapter()
-        {
-        }
-
-        /// <summary>
-        /// Gets the hashed password.
-        /// </summary>
-        /// <param name="password">The password.</param>
-        /// <returns></returns>
-        public string GetHashedPassword(string password)
-        {
-            //hash
-            var crypt = new SHA256Managed();
-            var hash = new StringBuilder();
-            var crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(password));
-            foreach (var theByte in crypto)
-            {
-                hash.Append(theByte.ToString("x2"));
-            }
-
-            var hashedPassword = hash.ToString();
-            return hashedPassword;
-        }
-    }
-
     public class AuthenticationService
     {
         private readonly ProfileDao _profileDao;
         private readonly Sha256Adapter _sha256Adapter;
+        private readonly OtpService _otpService;
 
         public AuthenticationService()
         {
             _profileDao = new ProfileDao();
             _sha256Adapter = new Sha256Adapter();
+            _otpService = new OtpService();
         }
 
         public bool Verify(string accountId, string password, string otp)
@@ -60,7 +34,7 @@ namespace DependencyInjectionWorkshop.Models
 
             var hashedPassword = _sha256Adapter.GetHashedPassword(password);
 
-            var currentOtp = GetCurrentOtp(accountId, httpClient);
+            var currentOtp = _otpService.GetCurrentOtp(accountId, httpClient);
 
             //compare
             if (passwordFromDb == hashedPassword && currentOtp == otp)
@@ -147,26 +121,6 @@ namespace DependencyInjectionWorkshop.Models
         {
             var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
             resetResponse.EnsureSuccessStatusCode();
-        }
-
-        /// <summary>
-        /// Gets the current otp.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        /// <returns></returns>
-        /// <exception cref="System.Exception">web api error, accountId:{accountId}</exception>
-        private static string GetCurrentOtp(string accountId, HttpClient httpClient)
-        {
-            //get otp
-            var response = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"web api error, accountId:{accountId}");
-            }
-
-            var currentOtp = response.Content.ReadAsAsync<string>().Result;
-            return currentOtp;
         }
     }
 
