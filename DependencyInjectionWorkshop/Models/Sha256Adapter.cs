@@ -3,7 +3,12 @@ using System.Text;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class Sha256Adapter
+    public interface IHash
+    {
+        string Compute(string password);
+    }
+
+    public class Sha256Adapter : IHash
     {
         public Sha256Adapter()
         {
@@ -14,7 +19,7 @@ namespace DependencyInjectionWorkshop.Models
         /// </summary>
         /// <param name="password">The password.</param>
         /// <returns></returns>
-        public string GetHashedPassword(string password)
+        public string Compute(string password)
         {
             //hash
             var crypt = new SHA256Managed();
