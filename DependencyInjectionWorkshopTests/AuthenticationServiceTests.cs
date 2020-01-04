@@ -30,13 +30,10 @@ namespace DependencyInjectionWorkshopTests
         }
 
         [Test]
-        public void is_valid()
+        public void reset_failed_count_when_valid()
         {
-            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
-            GivenHashedPassword("1234", "my hashed password");
-            GivenOtp(DefaultAccountId, "123456");
-
-            ShouldBeValid(DefaultAccountId, "1234", "123456");
+            WhenValid(); 
+            ShouldResetFailedCount(DefaultAccountId);
         }
 
         [Test]
@@ -47,6 +44,16 @@ namespace DependencyInjectionWorkshopTests
             GivenOtp(DefaultAccountId, "123456");
 
             ShouldBeInvalid(DefaultAccountId, "1234", "wrong otp");
+        }
+
+        [Test]
+        public void is_valid()
+        {
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp(DefaultAccountId, "123456");
+
+            ShouldBeValid(DefaultAccountId, "1234", "123456");
         }
 
         private void GivenHashedPassword(string password, string hashedPassword)
@@ -76,6 +83,21 @@ namespace DependencyInjectionWorkshopTests
             var isValid = _authenticationService.Verify(accountId, password, otp);
 
             Assert.IsTrue(isValid);
+        }
+
+        private void ShouldResetFailedCount(string accountId)
+        {
+            _failedCounter.Received(1)
+                          .Reset(accountId);
+        }
+
+        private void WhenValid()
+        {
+            GivenPasswordFromDb(DefaultAccountId, "my hashed password");
+            GivenHashedPassword("1234", "my hashed password");
+            GivenOtp(DefaultAccountId, "123456");
+
+            _authenticationService.Verify(DefaultAccountId, "1234", "123456");
         }
     }
 }
