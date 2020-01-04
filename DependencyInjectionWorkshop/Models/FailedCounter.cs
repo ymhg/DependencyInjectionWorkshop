@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
+#pragma warning disable 1591
 
 namespace DependencyInjectionWorkshop.Models
 {
@@ -8,24 +10,16 @@ namespace DependencyInjectionWorkshop.Models
         {
         }
 
-        /// <summary>
-        /// Resets the failed count.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        public void Reset(string accountId, HttpClient httpClient)
+        public void Reset(string accountId)
         {
+            HttpClient httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
             resetResponse.EnsureSuccessStatusCode();
         }
 
-        /// <summary>
-        /// Adds the failed count.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        public void AddFailedCount(string accountId, HttpClient httpClient)
+        public void AddFailedCount(string accountId)
         {
+            HttpClient httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
             addFailedCountResponse.EnsureSuccessStatusCode();
         }
@@ -34,10 +28,10 @@ namespace DependencyInjectionWorkshop.Models
         /// Gets the account is locked.
         /// </summary>
         /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
         /// <returns></returns>
-        public bool GetAccountIsLocked(string accountId, HttpClient httpClient)
+        public bool GetAccountIsLocked(string accountId)
         {
+            HttpClient httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var isLockedResponse = httpClient.PostAsJsonAsync("api/failedCounter/IsLocked", accountId).Result;
 
             isLockedResponse.EnsureSuccessStatusCode();
@@ -45,10 +39,10 @@ namespace DependencyInjectionWorkshop.Models
             return isLocked;
         }
 
-        public int GetFailedCount(string accountId, HttpClient httpClient)
+        public int GetFailedCount(string accountId)
         {
             var failedCountResponse =
-                httpClient.PostAsJsonAsync("api/failedCounter/GetFailedCount", accountId).Result;
+                new HttpClient() {BaseAddress = new Uri("http://joey.com/")}.PostAsJsonAsync("api/failedCounter/GetFailedCount", accountId).Result;
 
             failedCountResponse.EnsureSuccessStatusCode();
 

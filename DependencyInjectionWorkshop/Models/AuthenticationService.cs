@@ -26,10 +26,8 @@ namespace DependencyInjectionWorkshop.Models
 
         public bool Verify(string accountId, string password, string otp)
         {
-            var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
-
             //check account locked
-            var isLocked = _failedCounter.GetAccountIsLocked(accountId, httpClient);
+            var isLocked = _failedCounter.GetAccountIsLocked(accountId);
             if (isLocked)
             {
                 throw new FailedTooManyTimesException() {AccountId = accountId};
@@ -39,21 +37,21 @@ namespace DependencyInjectionWorkshop.Models
 
             var hashedPassword = _sha256Adapter.GetHashedPassword(password);
 
-            var currentOtp = _otpService.GetCurrentOtp(accountId, httpClient);
+            var currentOtp = _otpService.GetCurrentOtp(accountId);
 
             //compare
             if (passwordFromDb == hashedPassword && currentOtp == otp)
             {
-                _failedCounter.Reset(accountId, httpClient);
+                _failedCounter.Reset(accountId);
 
                 return true;
             }
             else
             {
                 //失敗
-                _failedCounter.AddFailedCount(accountId, httpClient);
+                _failedCounter.AddFailedCount(accountId);
 
-                LogFailedCount(accountId, httpClient);
+                LogFailedCount(accountId);
 
                 _slackAdapter.Notify(accountId);
 
@@ -61,15 +59,10 @@ namespace DependencyInjectionWorkshop.Models
             }
         }
 
-        /// <summary>
-        ///     Logs the failed count.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        private void LogFailedCount(string accountId, HttpClient httpClient)
+        private void LogFailedCount(string accountId)
         {
             //紀錄失敗次數 
-            var failedCount = _failedCounter.GetFailedCount(accountId, httpClient);
+            var failedCount = _failedCounter.GetFailedCount(accountId);
             _nLogAdapter.Info($"accountId:{accountId} failed times:{failedCount}");
         }
     }

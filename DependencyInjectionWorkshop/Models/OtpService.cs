@@ -13,11 +13,11 @@ namespace DependencyInjectionWorkshop.Models
         /// Gets the current otp.
         /// </summary>
         /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
         /// <returns></returns>
         /// <exception cref="System.Exception">web api error, accountId:{accountId}</exception>
-        public string GetCurrentOtp(string accountId, HttpClient httpClient)
+        public string GetCurrentOtp(string accountId)
         {
+            HttpClient httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             //get otp
             var response = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
             if (!response.IsSuccessStatusCode)
