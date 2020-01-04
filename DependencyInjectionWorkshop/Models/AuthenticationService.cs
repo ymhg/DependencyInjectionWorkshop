@@ -49,7 +49,7 @@ namespace DependencyInjectionWorkshop.Models
             else
             {
                 //失敗
-                AddFailedCount(accountId, httpClient);
+                _failedCounter.AddFailedCount(accountId, httpClient);
 
                 LogFailedCount(accountId, httpClient);
 
@@ -90,17 +90,6 @@ namespace DependencyInjectionWorkshop.Models
             var failedCount = failedCountResponse.Content.ReadAsAsync<int>().Result;
             var logger = NLog.LogManager.GetCurrentClassLogger();
             logger.Info($"accountId:{accountId} failed times:{failedCount}");
-        }
-
-        /// <summary>
-        /// Adds the failed count.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        private static void AddFailedCount(string accountId, HttpClient httpClient)
-        {
-            var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
-            addFailedCountResponse.EnsureSuccessStatusCode();
         }
     }
 
