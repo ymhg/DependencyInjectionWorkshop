@@ -11,6 +11,7 @@ namespace DependencyInjectionWorkshop.Models
         private readonly Sha256Adapter _sha256Adapter;
         private readonly OtpService _otpService;
         private readonly SlackAdapter _slackAdapter;
+        private readonly FailedCounter _failedCounter;
 
         public AuthenticationService()
         {
@@ -18,6 +19,7 @@ namespace DependencyInjectionWorkshop.Models
             _sha256Adapter = new Sha256Adapter();
             _otpService = new OtpService();
             _slackAdapter = new SlackAdapter();
+            _failedCounter = new FailedCounter();
         }
 
         public bool Verify(string accountId, string password, string otp)
@@ -40,7 +42,7 @@ namespace DependencyInjectionWorkshop.Models
             //compare
             if (passwordFromDb == hashedPassword && currentOtp == otp)
             {
-                ResetFailedCount(accountId, httpClient);
+                _failedCounter.Reset(accountId, httpClient);
 
                 return true;
             }
@@ -99,17 +101,6 @@ namespace DependencyInjectionWorkshop.Models
         {
             var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
             addFailedCountResponse.EnsureSuccessStatusCode();
-        }
-
-        /// <summary>
-        /// Resets the failed count.
-        /// </summary>
-        /// <param name="accountId">The account identifier.</param>
-        /// <param name="httpClient">The HTTP client.</param>
-        private static void ResetFailedCount(string accountId, HttpClient httpClient)
-        {
-            var resetResponse = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
-            resetResponse.EnsureSuccessStatusCode();
         }
     }
 
