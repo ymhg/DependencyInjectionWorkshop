@@ -7,9 +7,9 @@ namespace DependencyInjectionWorkshop.Models
     public class AuthenticationService : IAuthentication
     {
         private readonly IHash _hash;
+        private readonly ILogger _logger;
         private readonly IOtpService _otpService;
         private readonly IProfile _profile;
-        private readonly ILogger _logger;
 
         public AuthenticationService(IOtpService otpService, IProfile profile, IHash hash, ILogger logger)
         {
@@ -29,19 +29,15 @@ namespace DependencyInjectionWorkshop.Models
 
         public bool Verify(string accountId, string password, string otp)
         {
+            //_logger.Info($"parameters:{accountId} | {password} | {otp}");
+
             var passwordFromDb = _profile.GetPassword(accountId);
             var hashedPassword = _hash.Compute(password);
             var currentOtp = _otpService.GetCurrentOtp(accountId);
-            _logger.Info($"current otp:{currentOtp}");
 
-            if (passwordFromDb == hashedPassword && currentOtp == otp)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var isValid = passwordFromDb == hashedPassword && currentOtp == otp;
+            //_logger.Info($"return value:{isValid}");
+            return isValid;
         }
     }
 }
