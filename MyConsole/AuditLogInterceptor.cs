@@ -21,7 +21,8 @@ namespace MyConsole
             var currentUser = _context.GetUser();
             var parameters = string.Join("|", invocation.Arguments.Select(x => (x ?? "").ToString()));
 
-            _logger.Info($"[Audit] user:{currentUser.Name} invoke with parameters:{parameters}");
+            var methodName = invocation.Method.Name;
+            _logger.Info($"[Audit method:{methodName}] user:{currentUser.Name} invoke with parameters:{parameters}");
 
             invocation.Proceed();
 
