@@ -11,7 +11,12 @@ namespace MyConsole
     class Program
     {
         private static IContainer _container;
-        //private static IContext _context;
+
+        private static void Login(string userName)
+        {
+            var context = _container.Resolve<IContext>();
+            context.SetUser(userName);
+        }
 
         static void Main(string[] args)
         {
@@ -23,12 +28,6 @@ namespace MyConsole
 
             var isValid = authentication.Verify("joey", "abc", "wrong otp");
             Console.WriteLine($"result:{isValid}");
-        }
-
-        private static void Login(string userName)
-        {
-            IContext context = _container.Resolve<IContext>();
-            context.SetUser(userName);
         }
 
         private static void RegisterContainer()
@@ -66,29 +65,7 @@ namespace MyConsole
 
         public void SetUser(string userName)
         {
-            _user = new User(){Name = userName};
-        }
-    }
-
-    internal class AuditLogDecorator : AuthenticationDecoratorBase
-    {
-        private readonly ILogger _logger;
-        private readonly IContext _context;
-
-        public AuditLogDecorator(IAuthentication authentication, ILogger logger, IContext context) : base(
-            authentication)
-        {
-            _logger = logger;
-            _context = context;
-        }
-
-        public override bool Verify(string accountId, string password, string otp)
-        {
-            string userName = _context.GetUser().Name;
-            _logger.Info($"user:{userName}, parameters:{accountId} | {password} | {otp}");
-            var isValid = base.Verify(accountId, password, otp);
-            _logger.Info($"return value:{isValid}");
-            return isValid;
+            _user = new User() {Name = userName};
         }
     }
 
