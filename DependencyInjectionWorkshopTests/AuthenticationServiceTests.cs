@@ -30,9 +30,9 @@ namespace DependencyInjectionWorkshopTests
             _authentication =
                 new AuthenticationService(_otpService, _profile, _hash);
 
-            _authentication = new NotificationDecorator(_authentication, _notification);
             _authentication = new FailedCounterDecorator(_authentication, _failedCounter);
             _authentication = new LogDecorator(_authentication, _logger, _failedCounter);
+            _authentication = new NotificationDecorator(_authentication, _notification);
         }
 
         [Test]
@@ -50,6 +50,19 @@ namespace DependencyInjectionWorkshopTests
         {
             WhenValid();
             ShouldResetFailedCount(DefaultAccountId);
+        }
+
+        [Test]
+        public void check_decorator_order_when_invalid()
+        {
+            WhenInvalid();
+
+            Received.InOrder(() =>
+            {
+                _failedCounter.AddFailedCount(DefaultAccountId);
+                _logger.Info(Arg.Is<string>(m => m.Contains(DefaultAccountId)));
+                _notification.Notify(DefaultAccountId, Arg.Any<string>());
+            });
         }
 
         [Test]
