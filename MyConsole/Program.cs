@@ -10,22 +10,15 @@ namespace MyConsole
 {
     class Program
     {
-        private static IAuthentication _authentication;
-        private static IFailedCounter _failedCounter;
-        private static IHash _hash;
-        private static ILogger _logger;
-        private static INotification _notification;
-        private static IOtpService _otpService;
-        private static IProfile _profile;
         private static IContainer _container;
 
         static void Main(string[] args)
         {
             RegisterContainer();
 
-            _authentication = _container.Resolve<IAuthentication>();
+            var authentication = _container.Resolve<IAuthentication>();
 
-            var isValid = _authentication.Verify("joey", "abc", "wrong otp");
+            var isValid = authentication.Verify("joey", "abc", "wrong otp");
             Console.WriteLine($"result:{isValid}");
         }
 
