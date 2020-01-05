@@ -8,6 +8,7 @@ namespace DependencyInjectionWorkshop.Models
     public class AuthenticationService : IAuthentication
     {
         private readonly IFailedCounter _failedCounter;
+        private readonly FailedCounterDecorator _failedCounterDecorator;
         private readonly IHash _hash;
         private readonly ILogger _logger;
         private readonly INotification _notification;
@@ -35,6 +36,11 @@ namespace DependencyInjectionWorkshop.Models
             _logger = new NLogAdapter();
         }
 
+        public IFailedCounter FailedCounter
+        {
+            get { return _failedCounter; }
+        }
+
         public bool Verify(string accountId, string password, string otp)
         {
             //check account locked
@@ -53,18 +59,12 @@ namespace DependencyInjectionWorkshop.Models
             //compare
             if (passwordFromDb == hashedPassword && currentOtp == otp)
             {
-                _failedCounter.Reset(accountId);
-
                 return true;
             }
             else
             {
                 //失敗
-                _failedCounter.AddFailedCount(accountId);
-
                 LogFailedCount(accountId);
-
-                _notification.Notify(accountId, $"account:{accountId} try to login failed");
 
                 return false;
             }
