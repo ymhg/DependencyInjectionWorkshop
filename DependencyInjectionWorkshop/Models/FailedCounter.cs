@@ -16,6 +16,7 @@ namespace DependencyInjectionWorkshop.Models
         /// <returns></returns>
         bool GetAccountIsLocked(string accountId);
 
+        [AuditLog]
         int GetFailedCount(string accountId);
     }
 

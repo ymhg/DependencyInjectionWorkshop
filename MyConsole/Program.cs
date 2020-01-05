@@ -54,8 +54,6 @@ namespace MyConsole
             builder.RegisterDecorator<FailedCounterDecorator, IAuthentication>();
             builder.RegisterDecorator<LogDecorator, IAuthentication>();
             builder.RegisterDecorator<NotificationDecorator, IAuthentication>(); 
-            
-            //builder.RegisterDecorator<AuditLogDecorator, IAuthentication>();
 
             _container = builder.Build();
         }
