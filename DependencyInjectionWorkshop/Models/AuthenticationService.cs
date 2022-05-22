@@ -12,32 +12,20 @@ namespace DependencyInjectionWorkshop.Models
         private readonly IFailedCounter _failedCounter;
         private readonly IHash _hash;
         private readonly ILogger _logger;
-
-        private readonly INotification _notification;
-
         private readonly IOtp _otp;
         private readonly IProfile _profile;
 
-        public AuthenticationService(IFailedCounter failedCounter, IHash hash, ILogger logger,
-            INotification notification, IOtp otp, IProfile profile)
+        public AuthenticationService(IFailedCounter failedCounter, IHash hash, ILogger logger, IOtp otp, IProfile profile)
         {
             _failedCounter = failedCounter;
             _hash = hash;
             _logger = logger;
-            _notification = notification;
             _otp = otp;
             _profile = profile;
         }
 
-
         public bool Verify(string accountId, string inputPassword, string inputOtp)
         {
-            var isAccountLocked = _failedCounter.IsAccountLocked(accountId);
-            if (isAccountLocked)
-            {
-                throw new FailedTooManyTimesException { AccountId = accountId };
-            }
-
             var passwordFromDb = _profile.GetPasswordFromDb(accountId);
             var hashedPassword = _hash.Compute(inputPassword);
             var currentOtp = _otp.GetCurrentOtp(accountId);
@@ -52,8 +40,6 @@ namespace DependencyInjectionWorkshop.Models
 
             var failedCount = _failedCounter.Get(accountId);
             _logger.LogInfo($"accountId:{accountId} failed times:{failedCount}");
-
-            // _notificationDecorator.NotifyUserWhenInvalid(accountId);
 
             return false;
         }
