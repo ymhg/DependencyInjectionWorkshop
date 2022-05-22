@@ -19,6 +19,10 @@
             {
                 ResetFailedCount(accountId);
             }
+            else
+            {
+                AddFailedCount(accountId);
+            }
 
             return isValid;
         }
@@ -26,12 +30,20 @@
         private void CheckAccountLocked(string accountId)
         {
             var isAccountLocked = _failedCounter.IsAccountLocked(accountId);
-            if (isAccountLocked) throw new FailedTooManyTimesException { AccountId = accountId };
+            if (isAccountLocked)
+            {
+                throw new FailedTooManyTimesException { AccountId = accountId };
+            }
         }
 
         private void ResetFailedCount(string accountId)
         {
             _failedCounter.Reset(accountId);
+        }
+
+        private void AddFailedCount(string accountId)
+        {
+            _failedCounter.Add(accountId);
         }
     }
 }
