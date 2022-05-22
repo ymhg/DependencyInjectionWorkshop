@@ -2,12 +2,19 @@
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class AuthenticationService
+    public interface IAuthentication
+    {
+        bool Verify(string accountId, string inputPassword, string inputOtp);
+    }
+
+    public class AuthenticationService : IAuthentication
     {
         private readonly IFailedCounter _failedCounter;
         private readonly IHash _hash;
         private readonly ILogger _logger;
+
         private readonly INotification _notification;
+
         private readonly IOtp _otp;
         private readonly IProfile _profile;
 
@@ -46,7 +53,7 @@ namespace DependencyInjectionWorkshop.Models
             var failedCount = _failedCounter.Get(accountId);
             _logger.LogInfo($"accountId:{accountId} failed times:{failedCount}");
 
-            _notification.Notify(accountId);
+            // _notificationDecorator.NotifyUserWhenInvalid(accountId);
 
             return false;
         }
