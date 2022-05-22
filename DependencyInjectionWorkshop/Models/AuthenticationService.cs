@@ -15,7 +15,8 @@ namespace DependencyInjectionWorkshop.Models
         private readonly IOtp _otp;
         private readonly IProfile _profile;
 
-        public AuthenticationService(IFailedCounter failedCounter, IHash hash, ILogger logger, IOtp otp, IProfile profile)
+        public AuthenticationService(IFailedCounter failedCounter, IHash hash, ILogger logger, IOtp otp,
+            IProfile profile)
         {
             _failedCounter = failedCounter;
             _hash = hash;
@@ -32,7 +33,6 @@ namespace DependencyInjectionWorkshop.Models
 
             if (passwordFromDb == hashedPassword && inputOtp == currentOtp)
             {
-                _failedCounter.Reset(accountId);
                 return true;
             }
 

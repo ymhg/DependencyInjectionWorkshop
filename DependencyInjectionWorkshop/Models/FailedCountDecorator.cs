@@ -11,19 +11,27 @@
             _failedCounter = failedCounter;
         }
 
-        private void CheckAccountLocked(string accountId)
-        {
-            var isAccountLocked = _failedCounter.IsAccountLocked(accountId);
-            if (isAccountLocked)
-            {
-                throw new FailedTooManyTimesException { AccountId = accountId };
-            }
-        }
-
         public bool Verify(string accountId, string inputPassword, string inputOtp)
         {
             CheckAccountLocked(accountId);
-            return _authentication.Verify(accountId, inputPassword, inputOtp);
+            var isValid = _authentication.Verify(accountId, inputPassword, inputOtp);
+            if (isValid)
+            {
+                ResetFailedCount(accountId);
+            }
+
+            return isValid;
+        }
+
+        private void CheckAccountLocked(string accountId)
+        {
+            var isAccountLocked = _failedCounter.IsAccountLocked(accountId);
+            if (isAccountLocked) throw new FailedTooManyTimesException { AccountId = accountId };
+        }
+
+        private void ResetFailedCount(string accountId)
+        {
+            _failedCounter.Reset(accountId);
         }
     }
 }

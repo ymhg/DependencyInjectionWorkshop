@@ -19,10 +19,7 @@
         public bool Verify(string accountId, string inputPassword, string inputOtp)
         {
             var isValid = _authentication.Verify(accountId, inputPassword, inputOtp);
-            if (!isValid)
-            {
-                NotifyUserWhenInvalid(accountId);
-            }
+            if (!isValid) NotifyUserWhenInvalid(accountId);
 
             return isValid;
         }
